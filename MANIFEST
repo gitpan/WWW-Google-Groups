@@ -1,0 +1,9 @@
+Changes
+Groups.pm
+Groups/Article.pm
+Groups/NewsGroup.pm
+Groups/Thread.pm
+Makefile.PL
+MANIFEST
+test.pl
+META.yml                                Module meta-data (added by MakeMaker)
