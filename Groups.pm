@@ -2,7 +2,7 @@
 package WWW::Google::Groups;
 
 use strict;
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 use Data::Dumper;
 
@@ -84,6 +84,42 @@ sub save2mbox {
 }
 
 
+# ----------------------------------------------------------------------
+sub post {
+    my $self = shift;
+    my %arg = @_;
+
+    $self->{_agent}->get("http://posting.google.com/post?cmd=post&enc=ISO-8859-1&group=$arg{group}&gs=/groups%3Fhl%3Den%26lr%3D%26ie%3DUTF-8%26oe%3DUTF-8%26group%3D$arg{group}");
+    return unless $self->{_agent}->success();
+
+    $self->{_agent}->submit_form(
+				 form_number => 1,
+				 fields      => {
+				     Email    => $arg{email},
+				     Passwd   => $arg{passwd},
+				 }
+				 );
+    return unless $self->{_agent}->success();
+
+    $self->{_agent}->content=~/location\.replace\("(.+?)"\)/o;
+    $self->{_agent}->get("$1");
+    return unless $self->{_agent}->success();
+
+    $self->{_agent}->submit_form(
+				 form_number => 1,
+				 fields      => {
+				     group    => $arg{group},
+				     subject   => $arg{subject},
+				     body      => $arg{message},
+				 },
+				 button    => 'actYes',
+				 );
+    return unless $self->{_agent}->success();
+
+    $self->{_agent}->follow_link( text_regex => qr/Sign out/i );
+    1;
+}
+
 
 1;
 __END__
@@ -131,7 +167,7 @@ If you push 'raw' to the argument stack of $thread->next_article(), it will retu
 
 
 
-Even, you can use this more powerful method. It will try to mirror the whole newsgroup and save the messages to an Unix mbox.
+Even, you can use this more powerful method. It will try to mirror the whole newsgroup and save the messages to a Unix mbox.
 
     $agent->save2mbox(
 		      group => 'comp.lang.perl.misc',
@@ -164,6 +200,19 @@ Also, you can utilize the searching capability of google, and the interface is m
     }
 
 
+=head1 POSTING
+
+Posting function is supported since version 0.09. The agent logins to the system, uploads your data to google, and then signs out. Use it with your own caution. Please don't make any flood. 
+ 
+   $agent->post(
+		group => 'alt.test',
+		email => 'my@email.address',
+		passwd => 'my.passwd',
+		subject => 'A test',
+		message => 'BANG-BANG!',
+		);
+
+
 
 
 =head1 OH OH
@@ -176,8 +225,6 @@ It is heard that the module (is/may be) violating Google's term of service. So u
 =over
 
 =item * Advanced Search
-
-=item * Posting capability
 
 =back
 
