@@ -1,4 +1,4 @@
-# $Id: test.pl,v 1.11 2003/09/14 20:19:13 cvspub Exp $
+# $Id: test.pl,v 1.15 2003/09/16 15:11:02 cvspub Exp $
 use Test::More qw(no_plan);
 ok(1);
 
@@ -22,20 +22,36 @@ END{
 
 
 
+######################################################################
+# search
+######################################################################
+
 $agent = new WWW::Google::Groups(
 				 server => 'http://groups.google.com',
 				 proxy => $proxy,
 				 );
 
-ok($agent->save2mbox(
-		     group => $group,
-		     starting_thread => 0,
-#		     max_article_count => 2,
-		     max_thread_count => 2,
-		     target_mbox => $target,
-	       ));
-ok(-f $target);
+$result = $agent->search(
+			 query => 'groups',
+			 );
 
+
+if( $thread = $result->next_thread ){
+    ok(ref($thread));
+
+    $article = $thread->next_article();
+    ok(ref($article));
+
+    $article = $thread->next_article('raw');
+    ok(!ref($article));
+}
+
+#__END__
+
+
+######################################################################
+# step by step
+######################################################################
 #__END__
 
 $agent = new WWW::Google::Groups(
@@ -57,6 +73,29 @@ if( $thread = $group->next_thread() ){
     ok($article->header('From'));
     ok($article->body);
 }
+
+
+
+#__END__
+
+
+######################################################################
+# all in one
+######################################################################
+$agent = new WWW::Google::Groups(
+				 server => 'http://groups.google.com',
+				 proxy => $proxy,
+				 );
+
+ok($agent->save2mbox(
+		     group => $group,
+		     starting_thread => 0,
+#		     max_article_count => 2,
+		     max_thread_count => 2,
+		     target_mbox => $target,
+	       ));
+ok(-f $target);
+
 
 
 

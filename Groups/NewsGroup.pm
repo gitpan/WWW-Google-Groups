@@ -1,7 +1,6 @@
-# $Id: NewsGroup.pm,v 1.7 2003/09/14 20:02:51 cvspub Exp $
+# $Id: NewsGroup.pm,v 1.8 2003/09/15 13:49:48 cvspub Exp $
 package WWW::Google::Groups::NewsGroup;
 use strict;
-our $VERSION = '0.01';
 
 use WWW::Google::Groups::Thread;
 use WWW::Google::Groups::Vars;

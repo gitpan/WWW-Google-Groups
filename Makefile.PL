@@ -1,9 +1,10 @@
-# $Id: Makefile.PL,v 1.4 2003/09/14 08:09:43 cvspub Exp $
+# $Id: Makefile.PL,v 1.5 2003/09/16 15:14:51 cvspub Exp $
 use ExtUtils::MakeMaker;
-$proxy = prompt("Please set your PROXY server for faster testing:");
-open F, '>', '.proxy';
-print F $proxy.$/;
-close F;
+if($proxy = prompt("Please set your PROXY server for faster testing:")){
+    open F, '>', '.proxy';
+    print F $proxy.$/;
+    close F;
+}
 WriteMakefile(
 	      'NAME'		=> 'WWW::Google::Groups',
 	      'VERSION_FROM'	=> 'Groups.pm', 

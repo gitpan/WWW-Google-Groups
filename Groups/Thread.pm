@@ -1,7 +1,6 @@
-# $Id: Thread.pm,v 1.8 2003/09/14 20:18:47 cvspub Exp $
+# $Id: Thread.pm,v 1.11 2003/09/16 15:11:02 cvspub Exp $
 package WWW::Google::Groups::Thread;
 use strict;
-our $VERSION = '0.01';
 
 
 use WWW::Google::Groups::Article;
@@ -31,18 +30,34 @@ sub next_article {
 	return;
     }
 
+    my $content;
     if( !ref ($self->{_mids}) or !scalar @{$self->{_mids}}){
         $self->{_agent}->agent_alias( $agent_alias[int rand(scalar @agent_alias)] );
         $self->{_agent}->get($self->{_cur_thread}->{_url});
-	$self->{_agent}->follow_link(n => 2);
 
-        my $content = $self->{_agent}->content;
+	# get the left frame first
+        ($content = $self->{_agent}->content) =~ /left src="(.+?)#s"/s;
+	$self->{_agent}->get($self->{_server}.$1);
+
+	my @links;
+	foreach my $link (
+			  map{s/\x23link\d+$//o;$_}
+			  grep {/\x23link\d+$/}
+			  map{$_->url}
+			  $self->{_agent}->links
+			  ){
+	    push @links, $link unless $links[$#links-1] eq $link;
+	}
 
 	my @mids;
-	foreach my $link (grep{/selm=/o}map{$_->url}$self->{_agent}->links){
-	    $link =~ /selm=(.+?)$/o;
-	    push @mids, $1;
-	}
+        foreach my $link (@links){
+	    $self->{_agent}->get($self->{_server}.$link);
+	    foreach my $mlink (grep{!/rnum=/o}
+			       grep{/selm=/o}map{$_->url}$self->{_agent}->links){
+		$mlink =~ /selm=(.+?)$/o;
+		push @mids, $1;
+	    }
+        }
 	$self->{_mids} = \@mids;
     }
 

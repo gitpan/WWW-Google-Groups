@@ -1,17 +1,21 @@
-# $Id: Groups.pm,v 1.10 2003/09/14 20:19:31 cvspub Exp $
+# $Id: Groups.pm,v 1.14 2003/09/16 15:12:24 cvspub Exp $
 package WWW::Google::Groups;
 
 use strict;
-our $VERSION = '0.03';
-
+our $VERSION = '0.04';
 
 use Data::Dumper;
 
 use WWW::Google::Groups::NewsGroup;
 use WWW::Google::Groups::Vars;
 
+use WWW::Google::Groups::Search;
+our @ISA = qw(WWW::Google::Groups::Search);
+
 use WWW::Mechanize;
 
+
+# ----------------------------------------------------------------------
 sub new {
     my $pkg = shift;
     my %arg = @_;
@@ -22,20 +26,20 @@ sub new {
 
     my $a = new WWW::Mechanize;
     $a->proxy(['http'], $arg{proxy}) if $arg{proxy};
-    $a->agent_alias( $agent_alias[int rand(scalar @agent_alias)] );
 
     bless {
-	_server => $arg{server},
+	_server => ($arg{server} || 'http://groups.google.com/'),
 	_proxy => $arg{proxy},
 	_agent => $a,
     }, $pkg;
 }
 
+# ----------------------------------------------------------------------
 sub select_group($$) { new WWW::Google::Groups::NewsGroup(@_) }
 
+
+# ----------------------------------------------------------------------
 use Date::Parse;
-
-
 sub save2mbox {
     my $self = shift;
     my %arg = @_;
@@ -82,6 +86,7 @@ WWW::Google::Groups - Google Groups Agent
 
 =head1 SYNOPSIS
 
+=head2 BROWSING
 
     use WWW::Google::Groups;
 
@@ -127,8 +132,32 @@ Even, you can use this more powerful method. It will try to mirror the whole new
 		      target_mbox => 'perl.misc.mbox',
 		      );
 
+=head2 SEARCHING
 
-=head1 DESCRIPTION
+Also, you can utilize the searching capability of google, and the interface is much alike as the above.
+
+
+    $result = $agent->search(
+
+			     # your query string
+			     query => 'groups',
+
+			     # the limit on the number of threads to fetch
+			     limit => 10,
+
+			     );
+
+    while( $thread = $result->next_thread ){
+	while($article = $thread->next_article()){
+	    print $thread->title;
+	    print length $article->body();
+	}
+    }
+
+
+
+
+=head1 OH OH
 
 It is heard that the module (is/may be) violating Google's term of service. So use it at your risk. It is written for crawling back the whole histories of several newsgroups, for my personal interests. Since many NNTP servers do not have huge and complete collections, Google becomes my final solution. However, the www interface of google groups cannot satisfy me well, kind of a keyboard/console interface addict and I would like some sort of perl api. That's why I design this module. And hope Google will not notify me of any concern on this evil.
 
