@@ -1,8 +1,8 @@
-# $Id: Groups.pm,v 1.15 2003/09/21 10:24:57 cvspub Exp $
+# $Id: Groups.pm,v 1.16 2003/09/21 18:20:12 cvspub Exp $
 package WWW::Google::Groups;
 
 use strict;
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 use Data::Dumper;
 

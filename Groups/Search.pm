@@ -1,4 +1,4 @@
-# $Id: Search.pm,v 1.4 2003/09/16 15:11:02 cvspub Exp $
+# $Id: Search.pm,v 1.6 2003/09/21 18:20:36 cvspub Exp $
 package WWW::Google::Groups::Search;
 
 use strict;
@@ -44,6 +44,12 @@ sub search {
 	map { [ $url[$_], $title[$_] ] } 0..$#url;
     }
     new WWW::Google::Groups::SearchResult($self, \@result);
+}
+
+
+sub adv_search {
+    my $self = shift;
+    my %arg = @_;
 }
 
 
