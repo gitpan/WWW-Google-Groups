@@ -1,4 +1,4 @@
-# $Id: NewsGroup.pm,v 1.8 2003/09/15 13:49:48 cvspub Exp $
+# $Id: NewsGroup.pm,v 1.9 2003/09/22 03:14:55 cvspub Exp $
 package WWW::Google::Groups::NewsGroup;
 use strict;
 
@@ -23,20 +23,30 @@ use WWW::Mechanize;
 sub next_thread {
     my $self = shift;
 
+    if(defined $self->{_max_thread_count}){
+	return if $self->{_thread_no} >= $self->{_max_thread_count};
+    }
+
     if(!ref ($self->{_threads}) or !scalar @{$self->{_threads}}){
 	my @threads;
 	$self->{_agent}->agent_alias( $agent_alias[int rand(scalar @agent_alias)] );
+
 	$self->{_agent}->get($self->{_server}."/groups?dq=&num=25&hl=en&lr=&ie=UTF-8&group=".$self->{_group}."&safe=off&start=".$self->{_thread_no});
+
+#	print $self->{_agent}->uri(),$/;
+
 	my $content = $self->{_agent}->content;
 
 	foreach my $link (
-			  grep {$_->[0]=~/threadm=/o}
-			  grep {$_->[0]=~/groups\?/o}
+			  grep {$_->[0]=~/(?:threadm|selm)=/o}
+			  grep {$_->[0]=~m,/(?:url|groups)\?d?q=,o}
 			  map {[$_->url, $_->text]} $self->{_agent}->links
 			  ){
+#	    print ">>".$link->[0].$/;
 	    push @threads, { _url => $link->[0], _title => $link->[1] };
 	}
 	return unless @threads;
+#	print Dumper \@threads;
 	$self->{_threads} = \@threads;
     }
     $self->{_thread_no}++ if @{$self->{_threads}};

@@ -27,3 +27,7 @@ Revision history for Perl extension WWW::Google::Groups.
 
 0.06  Mon, 22 Sep 2003 02:19:17 +0800
 	- fixed duplicate messages fetching
+
+0.07  Mon, 22 Sep 2003 10:54:50 +0800
+	- void-email-address-in-header problem seems fixed.
+	- *really* seems rid of the message duplicate problem

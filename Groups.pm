@@ -1,8 +1,8 @@
-# $Id: Groups.pm,v 1.16 2003/09/21 18:20:12 cvspub Exp $
+# $Id: Groups.pm,v 1.17 2003/09/22 03:14:55 cvspub Exp $
 package WWW::Google::Groups;
 
 use strict;
-our $VERSION = '0.06';
+our $VERSION = '0.07';
 
 use Data::Dumper;
 
@@ -57,8 +57,15 @@ sub save2mbox {
 	while( my $article = $thread->next_article() ){
 #	    print join q/ /, map{$article->header($_)} qw(From Date Subject);
 #	    print $/;
-	    $article->header("From")=~ /\s*([<\(])(.+?@.+?)([>\)])\s*/;
-	    my $email = $2;
+	    my $email;
+	    $article->header("From")=~ /\s*(?:[<\(])(.+?@.+?)(?:[>\)])\s*/;
+	    unless($1){
+		$article->header("From")=~ /\s*(.+?@.+?)\s/o;
+		$email = $1;
+	    }
+	    else {
+		$email = $1;
+	    }
 	    my $date = scalar localtime str2time($article->header("Date"));
 	    my $content = $article->as_string;
 	    $content = "From $email $date\n".$content;
@@ -162,6 +169,17 @@ Also, you can utilize the searching capability of google, and the interface is m
 =head1 OH OH
 
 It is heard that the module (is/may be) violating Google's term of service. So use it at your risk. It is written for crawling back the whole histories of several newsgroups, for my personal interests. Since many NNTP servers do not have huge and complete collections, Google becomes my final solution. However, the www interface of google groups cannot satisfy me well, kind of a keyboard/console interface addict and I would like some sort of perl api. That's why I design this module. And hope Google will not notify me of any concern on this evil.
+
+
+=head1 TO DO
+
+=over
+
+=item * Advanced Search
+
+=item * Posting capability
+
+=back
 
 
 =head1 COPYRIGHT

@@ -1,4 +1,4 @@
-# $Id: Thread.pm,v 1.12 2003/09/21 18:20:12 cvspub Exp $
+# $Id: Thread.pm,v 1.13 2003/09/22 03:14:55 cvspub Exp $
 package WWW::Google::Groups::Thread;
 use strict;
 
@@ -35,31 +35,42 @@ sub next_article {
         $self->{_agent}->agent_alias( $agent_alias[int rand(scalar @agent_alias)] );
         $self->{_agent}->get($self->{_cur_thread}->{_url});
 
-	# get the left frame first
-        ($content = $self->{_agent}->content) =~ /left src="(.+?)#s"/s;
-	$self->{_agent}->get($self->{_server}.$1);
+	my @mids;
 
-	my @links;
-	foreach my $link (
-			  map{s/\x23link\d+$//o;$_}
-			  grep {/\x23link\d+$/}
-			  map{$_->url}
-			  $self->{_agent}->links
-			  ){
-	    push @links, $link unless $links[$#links-1] eq $link;
+	if($self->{_cur_thread}->{_url} !~ /selm=/o){
+	    # get the left frame first
+	    ($content = $self->{_agent}->content) =~ /left src="(.+?)#s"/s;
+	    $self->{_agent}->get($self->{_server}.$1);
+	    
+	    my @links;
+	    foreach my $link (
+			      map{s/\x23link\d+$//o;$_}
+			      grep {/\x23link\d+$/}
+			      map{$_->url}
+			      $self->{_agent}->links
+			      ){
+		push @links, $link unless $links[$#links-1] eq $link;
+	    }
+
+	    foreach my $link (@links){
+		$self->{_agent}->get($self->{_server}.$link);
+		foreach my $mlink (grep{!m,^http://,io}
+				   grep{!/rnum=/o}
+				   grep{/selm=/o}
+				   map{$_->url}$self->{_agent}->links){
+#		    print $mlink,$/;
+		    $mlink =~ /selm=(.+?)$/o;
+		    push @mids, $1;
+		}
+	    }
+	}
+	else {
+	    $self->{_cur_thread}->{_url} =~ /selm=(.+?)$/o;
+	    push @mids, $1;
 	}
 
-	my @mids;
-        foreach my $link (@links){
-	    $self->{_agent}->get($self->{_server}.$link);
-	    foreach my $mlink (grep{!m,^http://,io}
-			       grep{!/rnum=/o}
-			       grep{/selm=/o}
-			       map{$_->url}$self->{_agent}->links){
-		$mlink =~ /selm=(.+?)$/o;
-		push @mids, $1;
-	    }
-        }
+#	use Data::Dumper;
+#	print Dumper \@mids;
 	$self->{_mids} = \@mids;
     }
 
