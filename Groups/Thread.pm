@@ -1,10 +1,12 @@
-# $Id: Thread.pm,v 1.4 2003/09/04 07:32:23 cvspub Exp $
+# $Id: Thread.pm,v 1.6 2003/09/14 08:09:43 cvspub Exp $
 package WWW::Google::Groups::Thread;
 use strict;
 our $VERSION = '0.01';
 
 
 use WWW::Google::Groups::Article;
+use WWW::Google::Groups::Vars;
+
 use Storable qw(dclone);
 
 sub new {
@@ -21,8 +23,10 @@ sub title() { $_[0]->{_cur_thread}->{_title} }
 use WWW::Mechanize;
 sub next_article {
     my $self = shift;
+    my $type = shift;
 
-    if(!ref ($self->{_articles}) or !scalar @{$self->{_articles}}){
+    if( !ref ($self->{_mids}) or !scalar @{$self->{_mids}}){
+        $self->{_agent}->agent_alias( $agent_alias[int rand(scalar @agent_alias)] );
         $self->{_agent}->get($self->{_cur_thread}->{_url});
 	$self->{_agent}->follow_link(n => 2);
         my $content = $self->{_agent}->content;
@@ -35,7 +39,12 @@ sub next_article {
     }
     my $this_mid = shift @{$self->{_mids}};
     $self->{_agent}->get($self->{_server}."/groups?selm=${this_mid}&output=gplain");
-    new WWW::Google::Groups::Article(\$self->{_agent}->content());
+    if($type =~ /raw/io){
+	$self->{_agent}->content();
+    }
+    else {
+	new WWW::Google::Groups::Article(\$self->{_agent}->content());
+    }
 }
 
 

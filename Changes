@@ -4,3 +4,10 @@ Revision history for Perl extension WWW::Google::Groups.
 	- original version; created by h2xs 1.21 with options
 		-XA WWW::Google::Groups
 
+0.02  Sun, 14 Sep 2003 16:11:41 +0800
+	- several bugs fixed.
+	- added save2mbox() in Groups.pm
+	- added starting_thread() in Groups.pm
+	- added Groups/Vars.pm
+	- added @agent_alias in Groups/Vars.pm for simulating browsing with
+          different agent

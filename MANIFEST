@@ -3,6 +3,7 @@ Groups.pm
 Groups/Article.pm
 Groups/NewsGroup.pm
 Groups/Thread.pm
+Groups/Vars.pm
 Makefile.PL
 MANIFEST
 test.pl

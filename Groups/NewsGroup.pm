@@ -1,9 +1,10 @@
-# $Id: NewsGroup.pm,v 1.4 2003/09/04 07:32:23 cvspub Exp $
+# $Id: NewsGroup.pm,v 1.6 2003/09/14 08:09:43 cvspub Exp $
 package WWW::Google::Groups::NewsGroup;
 use strict;
 our $VERSION = '0.01';
 
 use WWW::Google::Groups::Thread;
+use WWW::Google::Groups::Vars;
 
 use Storable qw(dclone);
 sub new {
@@ -14,6 +15,10 @@ sub new {
     bless $hash, $pkg;
 }
 
+sub starting_thread($$) {
+    $_[0]->{_thread_no} = $_[1] if $_[1];
+    $_[0]->{_thread_no};
+}
 
 use WWW::Mechanize;
 sub next_thread {
@@ -21,13 +26,8 @@ sub next_thread {
 
     if(!ref ($self->{_threads}) or !scalar @{$self->{_threads}}){
 	my @threads;
-	if($self->{_thread_no} % 25){
-	    $self->{_agent}->get(
-				 $self->{_server}."/groups?hl=en&lr=&ie=UTF-8&safe=off&group=".$self->{_group});
-	}
-	else{
-	    $self->{_agent}->get($self->{_server}."/groups?dq=&num=25&hl=en&lr=&ie=UTF-8&group=".$self->{_group}."&safe=off&start=".$self->{_thread_no});
-	}
+	$self->{_agent}->agent_alias( $agent_alias[int rand(scalar @agent_alias)] );
+	$self->{_agent}->get($self->{_server}."/groups?dq=&num=25&hl=en&lr=&ie=UTF-8&group=".$self->{_group}."&safe=off&start=".$self->{_thread_no});
 	my $content = $self->{_agent}->content;
 
 	while( $content =~
