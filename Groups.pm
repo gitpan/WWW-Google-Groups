@@ -1,8 +1,8 @@
-# $Id: Groups.pm,v 1.17 2003/09/22 03:14:55 cvspub Exp $
+# $Id: Groups.pm,v 1.18 2004/01/03 19:09:42 cvspub Exp $
 package WWW::Google::Groups;
 
 use strict;
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 use Data::Dumper;
 
@@ -24,7 +24,7 @@ sub new {
 	$arg{$key} = 'http://'.$arg{$key} if $arg{$key} !~ m,^\w+?://,o;
     }
 
-    my $a = new WWW::Mechanize;
+    my $a = new WWW::Mechanize onwarn => undef, onerror => undef;
     $a->proxy(['http'], $arg{proxy}) if $arg{proxy};
 
     bless {

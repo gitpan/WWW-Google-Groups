@@ -1,4 +1,4 @@
-# $Id: test.pl,v 1.16 2003/09/21 10:24:57 cvspub Exp $
+# $Id: test.pl,v 1.17 2004/01/03 19:09:42 cvspub Exp $
 use Test::More qw(no_plan);
 ok(1);
 use Data::Dumper;
@@ -22,6 +22,7 @@ END{
 
 
 use subs qw(search step_by_step all_in_one);
+
 
 search();
 all_in_one();
