@@ -1,4 +1,4 @@
-# $Id: NewsGroup.pm,v 1.6 2003/09/14 08:09:43 cvspub Exp $
+# $Id: NewsGroup.pm,v 1.7 2003/09/14 20:02:51 cvspub Exp $
 package WWW::Google::Groups::NewsGroup;
 use strict;
 our $VERSION = '0.01';
@@ -15,7 +15,7 @@ sub new {
     bless $hash, $pkg;
 }
 
-sub starting_thread($$) {
+sub starting_thread($;$) {
     $_[0]->{_thread_no} = $_[1] if $_[1];
     $_[0]->{_thread_no};
 }
@@ -30,12 +30,12 @@ sub next_thread {
 	$self->{_agent}->get($self->{_server}."/groups?dq=&num=25&hl=en&lr=&ie=UTF-8&group=".$self->{_group}."&safe=off&start=".$self->{_thread_no});
 	my $content = $self->{_agent}->content;
 
-	while( $content =~
-	       m!<font face=arial,sans\-serif>(.+?)</font></td><td><font face=arial,sans-serif>.+?</font></td>!mgo ){
-	    my $subc = $1;
-	    next unless $subc =~ m,a href=/groups,o;
-	    $subc =~ m'<a href=(/groups\?.+?) >(.+?)</a>&nbsp; <font size=-1>\((\d+) articles?\)</font>';
-	    push @threads, { _url => $1, _title => $2 };
+	foreach my $link (
+			  grep {$_->[0]=~/threadm=/o}
+			  grep {$_->[0]=~/groups\?/o}
+			  map {[$_->url, $_->text]} $self->{_agent}->links
+			  ){
+	    push @threads, { _url => $link->[0], _title => $link->[1] };
 	}
 	return unless @threads;
 	$self->{_threads} = \@threads;

@@ -1,8 +1,11 @@
-# $Id: Groups.pm,v 1.8 2003/09/14 08:29:22 cvspub Exp $
+# $Id: Groups.pm,v 1.10 2003/09/14 20:19:31 cvspub Exp $
 package WWW::Google::Groups;
 
 use strict;
-our $VERSION = '0.02';
+our $VERSION = '0.03';
+
+
+use Data::Dumper;
 
 use WWW::Google::Groups::NewsGroup;
 use WWW::Google::Groups::Vars;
@@ -32,6 +35,7 @@ sub select_group($$) { new WWW::Google::Groups::NewsGroup(@_) }
 
 use Date::Parse;
 
+
 sub save2mbox {
     my $self = shift;
     my %arg = @_;
@@ -44,7 +48,6 @@ sub save2mbox {
     $group->starting_thread($arg{starting_thread});
 
     open F, '>', $arg{target_mbox} or die "Cannot create mbox $arg{target_mbox}";
-    use Data::Dumper;
   MIRROR:
     while( my $thread = $group->next_thread() ){
 	while( my $article = $thread->next_article() ){

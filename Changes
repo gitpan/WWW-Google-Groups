@@ -11,3 +11,7 @@ Revision history for Perl extension WWW::Google::Groups.
 	- added Groups/Vars.pm
 	- added @agent_alias in Groups/Vars.pm for simulating browsing with
           different agent
+
+0.03  Mon, 15 Sep 2003 04:17:02 +0800
+	- fixed infinite fetching problem
+	- several code reductions using mechanize methods

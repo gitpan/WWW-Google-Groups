@@ -1,4 +1,4 @@
-# $Id: Thread.pm,v 1.6 2003/09/14 08:09:43 cvspub Exp $
+# $Id: Thread.pm,v 1.8 2003/09/14 20:18:47 cvspub Exp $
 package WWW::Google::Groups::Thread;
 use strict;
 our $VERSION = '0.01';
@@ -12,6 +12,7 @@ use Storable qw(dclone);
 sub new {
     my ($pkg, $arg, $thread) = @_;
     my $hash = dclone $arg;
+    return unless defined $thread;
     delete $hash->{_threads};
     $hash->{_cur_thread} = $thread;
     $hash->{_cur_thread}->{_url} = $hash->{_server}.$thread->{_url};
@@ -25,26 +26,33 @@ sub next_article {
     my $self = shift;
     my $type = shift;
 
+    if($self->{_goto_next_thread}){
+	$self->{_goto_next_thread} = 0;
+	return;
+    }
+
     if( !ref ($self->{_mids}) or !scalar @{$self->{_mids}}){
         $self->{_agent}->agent_alias( $agent_alias[int rand(scalar @agent_alias)] );
         $self->{_agent}->get($self->{_cur_thread}->{_url});
 	$self->{_agent}->follow_link(n => 2);
+
         my $content = $self->{_agent}->content;
 
 	my @mids;
-	while( $content =~ m,href=/groups\?dq=&hl=en&lr=&ie=UTF-8&safe=off&selm=(.+?) target,go){
+	foreach my $link (grep{/selm=/o}map{$_->url}$self->{_agent}->links){
+	    $link =~ /selm=(.+?)$/o;
 	    push @mids, $1;
 	}
 	$self->{_mids} = \@mids;
     }
+
+    $self->{_goto_next_thread} = 1 if 1==scalar@{$self->{_mids}};
     my $this_mid = shift @{$self->{_mids}};
     $self->{_agent}->get($self->{_server}."/groups?selm=${this_mid}&output=gplain");
-    if($type =~ /raw/io){
-	$self->{_agent}->content();
-    }
-    else {
-	new WWW::Google::Groups::Article(\$self->{_agent}->content());
-    }
+
+    $type=~/raw/io?
+	$self->{_agent}->content() :
+	    new WWW::Google::Groups::Article(\$self->{_agent}->content());
 }
 
 
