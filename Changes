@@ -21,3 +21,6 @@ Revision history for Perl extension WWW::Google::Groups.
 	- complete thread downloading
 	- added Groups/Search.pm
 	- added Groups/SearchResult.pm
+
+0.05  Sun, 21 Sep 2003 18:22:45 +0800
+	- fixed ill-formatted mbox dumping

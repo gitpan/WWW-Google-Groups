@@ -1,8 +1,8 @@
-# $Id: Groups.pm,v 1.14 2003/09/16 15:12:24 cvspub Exp $
+# $Id: Groups.pm,v 1.15 2003/09/21 10:24:57 cvspub Exp $
 package WWW::Google::Groups;
 
 use strict;
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use Data::Dumper;
 
@@ -55,11 +55,13 @@ sub save2mbox {
   MIRROR:
     while( my $thread = $group->next_thread() ){
 	while( my $article = $thread->next_article() ){
+#	    print join q/ /, map{$article->header($_)} qw(From Date Subject);
+#	    print $/;
 	    $article->header("From")=~ /\s*([<\(])(.+?@.+?)([>\)])\s*/;
 	    my $email = $2;
 	    my $date = scalar localtime str2time($article->header("Date"));
 	    my $content = $article->as_string;
-	    $content =~ s/From:\s.+?\n/From $email $date\n$&/o;
+	    $content = "From $email $date\n".$content;
 	    print F $content;
 	    $article_count++;
 	    last MIRROR if
